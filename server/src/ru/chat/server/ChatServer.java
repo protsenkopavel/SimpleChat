@@ -16,7 +16,7 @@ public class ChatServer implements TCPConnectionListener {
 
     private final List<TCPConnection> connections = new ArrayList<>();
 
-    private ChatServer(){
+    private ChatServer() {
         System.out.println("Server has been running");
         try (ServerSocket serverSocket = new ServerSocket(8189)) {
             while (true) {
@@ -32,22 +32,32 @@ public class ChatServer implements TCPConnectionListener {
     }
 
     @Override
-    public void onConnectionReady(TCPConnection tcpConnection) {
-
+    public synchronized void onConnectionReady(TCPConnection tcpConnection) {
+        connections.add(tcpConnection);
+        sendAll("Client connected: " + tcpConnection);
     }
 
     @Override
-    public void onReceiveString(TCPConnection tcpConnection, String string) {
-
+    public synchronized void onReceiveString(TCPConnection tcpConnection, String msg) {
+        sendAll(msg);
     }
 
     @Override
-    public void onDisconnection(TCPConnection tcpConnection) {
-
+    public synchronized void onDisconnection(TCPConnection tcpConnection) {
+        connections.remove(tcpConnection);
+        sendAll("Client disconnected: " + tcpConnection);
     }
 
     @Override
-    public void onException(TCPConnection tcpConnection, Exception e) {
+    public synchronized void onException(TCPConnection tcpConnection, Exception e) {
+        System.out.println("TCPConnection exception: " + e);
+    }
 
+    private void sendAll(String value) {
+        System.out.println(value);
+        final int cnt = connections.size();
+        for (int i = 0; i < cnt; i++) {
+            connections.get(i).sendMessage(value);
+        }
     }
 }
