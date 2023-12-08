@@ -5,7 +5,6 @@ import ru.chat.network.TCPConnectionListener;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,9 +54,8 @@ public class ChatServer implements TCPConnectionListener {
 
     private void sendAll(String value) {
         System.out.println(value);
-        final int cnt = connections.size();
-        for (int i = 0; i < cnt; i++) {
-            connections.get(i).sendMessage(value);
+        for (TCPConnection connection : connections) {
+            connection.sendMessage(value);
         }
     }
 }
